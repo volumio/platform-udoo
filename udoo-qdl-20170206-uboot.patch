@@ -1,0 +1,39 @@
+diff --git a/include/configs/udoo_qdl.h b/include/configs/udoo_qdl.h
+index 72b448d..7db2b2d 100644
+--- a/include/configs/udoo_qdl.h
++++ b/include/configs/udoo_qdl.h
+@@ -105,6 +105,8 @@
+ 	"initrd_high=0xffffffff\0" \
+ 	"fdt_file=undefined\0" \
+ 	"fdt_addr=0x18000000\0" \
++    "rd_addr=0x14800000\0" \
++    "rd_file=undefined\0" \
+ 	"boot_fdt=try\0" \
+ 	"ip_dyn=yes\0" \
+ 	"mmcdev=0\0" \
+@@ -133,11 +135,16 @@
+ 		"env import -t ${loadaddr} ${filesize};\0" \
+ 	"loadimage=fatload " UBOOT_DEVICE " ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" \
+ 	"loadfdt=fatload " UBOOT_DEVICE " ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" \
++	"loadrd=fatload " UBOOT_DEVICE " ${mmcdev}:${mmcpart} ${rd_addr} ${rd_file}\0" \
+ 	"mmcboot=echo Booting from mmc ...; " \
+ 		"run mmcargs; " \
+ 		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
+ 			"if run loadfdt; then " \
+-				"bootz ${loadaddr} - ${fdt_addr}; " \
++				"if test ${rd_file} = undefined; then " \
++					"bootz ${loadaddr} - ${fdt_addr}; " \
++				"else " \
++					"bootz ${loadaddr} ${rd_addr}:0x${filesize} ${fdt_addr}; " \
++				"fi; " \
+ 			"else " \
+ 				"if test ${boot_fdt} = try; then " \
+ 					"bootz; " \
+@@ -181,6 +188,7 @@
+ 			"fi; " \
+ 			"udooinit; " \
+ 			"if run loadimage; then " \
++				"run loadrd; " \
+ 				"run mmcboot; " \
+ 			"else run netboot; " \
+ 			"fi; " \

@@ -1,0 +1,41 @@
+diff --git a/include/configs/udoo_neo.h b/include/configs/udoo_neo.h
+index 545df61..82e8805 100644
+--- a/include/configs/udoo_neo.h
++++ b/include/configs/udoo_neo.h
+@@ -171,6 +171,8 @@
+ 	"initrd_high=0xffffffff\0" \
+ 	"fdt_file=autodetect\0" \
+ 	"fdt_addr=0x83000000\0" \
++	"rd_addr=0x83800000\0" \
++	"rd_file=undefined\0" \
+ 	"boot_fdt=try\0" \
+ 	"ip_dyn=yes\0" \
+ 	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
+@@ -186,11 +188,16 @@
+ 		"env import -t ${loadaddr} ${filesize};\0" \
+ 	"loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" \
+ 	"loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" \
++	"loadrd=fatload mmc ${mmcdev}:${mmcpart} ${rd_addr} ${rd_file}\0" \
+ 	"mmcboot=echo Booting from mmc ...; " \
+ 		"run mmcargs; " \
+ 		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
+ 			"if run loadfdt; then " \
+-				"bootz ${loadaddr} - ${fdt_addr}; " \
++				"if test ${rd_file} = undefined; then " \
++					"bootz ${loadaddr} - ${fdt_addr}; " \
++				"else " \
++					"bootz ${loadaddr} ${rd_addr}:0x${filesize} ${fdt_addr}; " \
++				"fi; " \
+ 			"else " \
+ 				"if test ${boot_fdt} = try; then " \
+ 					"bootz; " \
+@@ -236,6 +243,9 @@
+ 		"udooinit; " \
+ 		"run m4boot; " \
+ 		"if run loadimage; then " \
++			"if test ${rd_file} != undefined; then " \
++				"run loadrd; " \
++			"fi; " \
+ 			"run mmcboot; " \
+ 		"else run netboot; " \
+ 		"fi; " \
