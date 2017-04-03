@@ -35,6 +35,8 @@ udoo-qdl:
 
 **Platform files for udoo-neo**
 - 20170207: Initial version
+- 20170331: Added snd_aloop to support brutefir
 
 **Platform files for udoo-qdl**
 - 20170207: Initial version
+- 20170331: Added snd_aloop to support brutefir
